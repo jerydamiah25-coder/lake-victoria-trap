@@ -343,6 +343,7 @@ footer a { color: var(--lake); }
           <button type="button" id="rebait">Load fresh bait here</button>
           <button type="button" id="invade">Release 5 perch here</button>
           <button type="button" id="sterRelease">Release 10 sterilized perch here</button>
+          <button type="button" id="skipPerch">Skip to the last perch</button>
           <button type="button" id="reset">Restart lake</button>
         </div>
       </section>
@@ -1255,12 +1256,13 @@ new ResizeObserver(resize).observe(cv); resize();
 let last = performance.now(), uiAcc = 0;
 function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now;
-  if (running) {
+  if (skip) skipStep();
+  else if (running) {
     const sim = dt * speed, n = Math.ceil(sim / .035);
     for (let i = 0; i < n; i++) update(sim / n);
   }
-  if (mode === 'factory') renderFactory(running ? dt * speed : 0);
-  else { if (running) at(view, () => updateNet(Math.min(dt * speed, .4))); at(view, render); }
+  if (mode === 'factory') renderFactory(running && !skip ? dt * speed : 0);
+  else { if (running && !skip) at(view, () => updateNet(Math.min(dt * speed, .4))); at(view, render); }
   uiAcc += dt; if (uiAcc > .25) { uiAcc = 0; updateUI(); }
   requestAnimationFrame(frame);
 }
@@ -2387,7 +2389,44 @@ $('sterRelease').onclick = () => {
   });
   updateUI();
 };
-$('reset').onclick = () => init();
+$('reset').onclick = () => { if (skip) stopSkip(); init(); };
+
+/* ---------- skip ahead to the moment the last breeding Nile perch is gone ---------- */
+const SKIP_MAX_DAYS = 360 * 30;
+let skip = null;
+// breeding perch left at a site: fertile perch not locked in a prison, plus perch eggs still to hatch
+const perchLeft = s => siteCounts(s, true).perch + s.eggs.reduce((a, e) => a + (e.sp === 'perch' ? e.n : 0), 0);
+const span = d => { const y = Math.floor(d / 360), r = d % 360; return [y && `${y} year${y > 1 ? 's' : ''}`, (r || !y) && `${r} day${r === 1 ? '' : 's'}`].filter(Boolean).join(' and '); };
+function skipStep() {
+  // run the lake as fast as the browser allows, about 25 ms of work per frame so the page stays responsive
+  const end = performance.now() + 25;
+  while (performance.now() < end) {
+    for (let i = 0; i < 20; i++) update(.035);
+    let left = 0;
+    for (const s of sites) { const n = perchLeft(s); if (n) skip.where = s; left += n; }
+    if (!left) return stopSkip('done');
+    if (day - skip.from >= SKIP_MAX_DAYS) return stopSkip('timeout');
+  }
+  $('skipPerch').textContent = `Skipping… day ${day} (stop)`;
+}
+function stopSkip(how) {
+  const k = skip; skip = null;
+  $('skipPerch').textContent = 'Skip to the last perch';
+  if (how === 'done') {
+    running = false; $('play').textContent = 'Play';
+    setView(Math.max(0, sites.indexOf(k.where)));
+    at(view, () => log(`<b>The last breeding Nile perch is gone</b>, ${span(day - k.from)} after skipping ahead (day ${day}). The lake is paused here; press Play to carry on.`, 'inv'));
+  } else if (how === 'timeout') {
+    at(view, () => log(`Skipped ${span(SKIP_MAX_DAYS)} ahead, but Nile perch are still breeding. Try more prison or sterilizer traps.`, 'inv'));
+  } else if (k) at(view, () => log(`Stopped skipping on day ${day}.`));
+  updateUI();
+}
+$('skipPerch').onclick = () => {
+  if (skip) return stopSkip();
+  if (!sites.some(perchLeft)) { at(view, () => log('There are no breeding Nile perch left in the lake.')); return; }
+  skip = { from: day, where: view };
+  running = true; $('play').textContent = 'Pause';
+};
 $('addTrapBtn').onclick = () => addTrap($('newRole').value);
 // adds a prison, a sterilizer and a refuge, as many as still fit at this site
 $('addEvery').onclick = () => { for (const r of Object.keys(ROLES)) addTrap(r); };
