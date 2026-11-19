@@ -250,8 +250,7 @@ footer { font-size: 12.5px; color: var(--muted); max-width: 80ch; display: grid;
 footer p { margin: 0; }
 footer a { color: var(--lake); }
 </style>
-</head>
-<body>
+</head><body>
 
 <div class="wrap">
   <header>
@@ -688,9 +687,9 @@ function init() {
 
 /* ---------- ecology ---------- */
 // fish held in a prison are out of the lake; fish sheltering in a refuge still count
-function siteCounts(s) {
+function siteCounts(s, fertileOnly) {
   const c = {}; for (const k in SP) c[k] = 0;
-  for (const f of s.fish) if (!f.dead && f.hold !== 'prison' && f.state !== 'flying' && f.state !== 'netted') c[f.sp]++;
+  for (const f of s.fish) if (!f.dead && f.hold !== 'prison' && f.state !== 'flying' && f.state !== 'netted' && !(fertileOnly && f.sterile)) c[f.sp]++;
   return c;
 }
 const counts = () => siteCounts({ fish });
@@ -709,14 +708,15 @@ function dayTick() {
   day++;
   const m = month(), msg = SEASON_MSG[day % 360], avg = {};
   for (const k in SP) avg[k] = 0;
-  for (const s of sites) { const c = siteCounts(s); for (const k in SP) avg[k] += c[k] / sites.length; }
+  for (const s of sites) { const c = siteCounts(s, true); for (const k in SP) avg[k] += c[k] / sites.length; }
   for (const s of sites) at(s, () => { if (msg) log(msg); siteDay(m, avg); });
   recordLake();
 }
 function siteDay(m, avg) {
   const c = counts();
-  // fish swim in from other parts of the lake, more often when the lake as a whole is full of them
-  for (const k in SP) if (Math.random() < SP[k].imm * clamp(avg[k] / START[k], .15, 2) && c[k] < SP[k].K) spawnEdge(k);
+  // fish swim in from other parts of the lake, more often when the lake as a whole is full of them;
+  // once a species has no fertile fish left anywhere, none can arrive
+  for (const k in SP) if (Math.random() < SP[k].imm * clamp(avg[k] / START[k], 0, 2) && c[k] < SP[k].K) spawnEdge(k);
   nests = nests.filter(n => n.until > day);
   for (const e of eggs) if (e.hatch <= day) {
     for (let i = 0; i < e.n; i++) fish.push(makeFish(e.sp, clamp(e.x + R(-10, 10), 6, 994), clamp(e.y + R(-8, 8), 108, 512), true));
@@ -2448,5 +2448,4 @@ requestAnimationFrame(frame);
 </script>
 
 
-</body>
-</html>
+</body></html>
