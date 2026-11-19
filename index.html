@@ -36,6 +36,7 @@ img { max-width: 100%; }
   --invasive: #b9452a;
   --native: #1d8256;
   --gold: #b88a0c;
+  --algae: #5f8a12;
   --font-display: 'Bricolage Grotesque', 'Avenir Next', system-ui, sans-serif;
   --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
@@ -44,14 +45,14 @@ img { max-width: 100%; }
   :root:not([data-theme="light"]) {
     --bg: #0d1615; --surface: #14211f; --ink: #e2ebe5; --muted: #91a49a; --line: #263731;
     --lake: #45aaa0; --balloon: #f07fb0; --on-balloon: #2a0d1b; --sterile: #b9a3ff; --refuge: #5fd39b;
-    --invasive: #ee7c57; --native: #4cc48b; --gold: #e6bd3e;
+    --invasive: #ee7c57; --native: #4cc48b; --gold: #e6bd3e; --algae: #a5d65a;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0d1615; --surface: #14211f; --ink: #e2ebe5; --muted: #91a49a; --line: #263731;
   --lake: #45aaa0; --balloon: #f07fb0; --on-balloon: #2a0d1b; --sterile: #b9a3ff; --refuge: #5fd39b;
-  --invasive: #ee7c57; --native: #4cc48b; --gold: #e6bd3e;
+  --invasive: #ee7c57; --native: #4cc48b; --gold: #e6bd3e; --algae: #a5d65a;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -246,6 +247,10 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 2px 0; width: 100%; }
 .mlist .dot { width: 10px; height: 10px; border-radius: 50%; align-self: center; }
 .mlist b { font-family: var(--font-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
 .mlist small { grid-column: 2 / -1; color: var(--muted); font-size: 11.5px; }
+.meter.algae strong { color: var(--algae); }
+.meter.algae .gauge i { background: var(--algae); }
+.meter.algae strong small { font-size: 13px; font-weight: 400; color: var(--muted); }
+#algaeChart { width: 100%; height: 170px; display: block; }
 footer { font-size: 12.5px; color: var(--muted); max-width: 80ch; display: grid; gap: 6px; }
 footer p { margin: 0; }
 footer a { color: var(--lake); }
@@ -458,6 +463,36 @@ footer a { color: var(--lake); }
     <p class="hint">Nile perch hunt the small cichlids. When perch numbers climb, cichlids fall. Prisons take perch out of the lake; refuges protect cichlids even where perch stay; sterilizers stop perch breeding but leave the adults hunting.</p>
   </section>
 
+  <section class="panel" aria-labelledby="h-algae">
+    <div class="panel-head">
+      <h2 id="h-algae">Algae and oxygen</h2>
+      <div class="seg" role="group" aria-label="Algae covers">
+        <button type="button" data-scope="lake" aria-pressed="true">Whole lake</button>
+        <button type="button" data-scope="site" aria-pressed="false">This site</button>
+      </div>
+    </div>
+    <div class="meters">
+      <div class="meter algae">
+        <span class="label">Algae level · chlorophyll in the water</span>
+        <strong id="aLevel">0 <small>µg/L</small></strong>
+        <div class="gauge" role="meter" aria-label="Algae level" aria-valuemin="0" aria-valuemax="80" aria-valuenow="0" id="aGauge"><i id="aBar"></i></div>
+        <ul class="mlist" id="aList"></ul>
+      </div>
+      <div class="meter death">
+        <span class="label">Fish killed by algae · suffocated</span>
+        <strong id="aDead">≈ 0</strong>
+        <ul class="mlist" id="aDeadList"></ul>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i style="background: var(--algae)"></i>Algae, left scale (µg/L)</span>
+      <span><i style="background: var(--invasive)"></i>Nile perch, right scale</span>
+      <span class="status" id="algaeWhere"></span>
+    </div>
+    <canvas id="algaeChart" aria-label="Line chart of algae level and Nile perch numbers over simulated days"></canvas>
+    <p class="hint">Haplochromine cichlids eat algae. When Nile perch eat the cichlids, less algae gets eaten and the water turns green. When a big bloom dies, rotting algae use up the oxygen and fish suffocate; Nile perch need the most oxygen, so they die first. The fewer Nile perch are left, the lower the algae: take them all out and the cichlids graze the water back to the clear lake of the 1960s.</p>
+  </section>
+
   <footer>
     <p>A teaching model, not a field forecast. Nile perch were introduced to Lake Victoria in the 1950s and helped wipe out hundreds of haplochromine cichlid species. Time is sped up so the effect shows up in a few minutes. The sterilizer and refuge are ideas to explore, not tested devices.</p>
     <p>Where the real-world numbers come from: the lake starts at the <a href="https://lvfo.org/sites/default/files/field/2022%20HYDROACOUSTICS%20SURVEY.pdf">2022 LVFO hydro-acoustic survey</a> (333,341 tonnes of Nile perch, 1,060,589 t of dagaa, cichlids about 15% of a 2.23 million tonne total). Those tonnes are turned into fish using typical weights: surveyed Nile perch are mostly young, averaging about 18 cm (<a href="https://lvfo.org/sites/default/files/field/2020%20Hydroacoustic%20Survey%20Report_Final1.pdf">2020 survey</a>), so about 100 g each; cichlids about 10 g; dagaa about 0.8 g. Fishing takes the share of each stock landed in 2021 (<a href="https://lvfo.org/sites/default/files/field/JUNE%202021%20REGIONAL%20CAS%20REPORT_FINAL.pdf">LVFO catch assessment</a>: 916,859 t of dagaa, 221,640 t of Nile perch, 58,862 t of cichlids). Dagaa size, maturity and egg counts are from Nyanza Gulf studies (<a href="https://sidalc.net/search/Search2Record/dig-aquadocs-1834-21389">AquaDocs</a>). Today's Nile perch eat mostly shrimp (not shown), young perch and dagaa (<a href="https://link.springer.com/content/pdf/10.1007/s10750-011-0822-1.pdf">Hydrobiologia 2011</a>). Tilapia, ngege and ningu aren't counted by the survey, so their numbers are rough guesses. Nile perch egg counts and size at maturity are from Lake Victoria studies (<a href="https://www.grocentre.is/static/gro/publication/1892/document/Nduwayesu22prf.pdf">GRÓ</a>, <a href="https://worldfishcenter.org/publication/growth-mortality-and-recruitment-nile-perch-lates-niloticus-l-centropomidae-nyanza-gulf">WorldFish</a>), Nile tilapia from the Nyanza Gulf (<a href="https://agris.fao.org/search/en/records/66291282dd0a5d0f2161920b">FAO AGRIS</a>) and ningu from the Kuja-Migori river basin (<a href="https://repository.nrf.go.ke/items/c741f788-7070-459b-b56f-ccb0ca14d33c">NRF Kenya</a>).</p>
@@ -542,13 +577,21 @@ const SEASON_MSG = {
 };
 // Real places around Lake Victoria. mx/my place them on the sketch map; mix scales the starting perch.
 const SITES = [
-  { name: 'Winam Gulf', country: 'Kenya', mx: 248, my: 78, lx: 238, ly: 81, anchor: 'end', mix: 1 },
-  { name: 'Murchison Bay', country: 'Uganda', mx: 102, my: 44, lx: 112, ly: 47, anchor: 'start', mix: .8 },
-  { name: 'Sesse Islands', country: 'Uganda', mx: 66, my: 92, lx: 76, ly: 95, anchor: 'start', mix: .7 },
-  { name: 'Speke Gulf', country: 'Tanzania', mx: 178, my: 224, lx: 188, ly: 227, anchor: 'start', mix: 1.2 },
-  { name: 'Mwanza Gulf', country: 'Tanzania', mx: 114, my: 270, lx: 124, ly: 273, anchor: 'start', mix: 1.1 },
-  { name: 'Emin Pasha Gulf', country: 'Tanzania', mx: 56, my: 262, lx: 20, ly: 302, anchor: 'start', mix: .9 },
+  { name: 'Winam Gulf', country: 'Kenya', mx: 248, my: 78, lx: 238, ly: 81, anchor: 'end', mix: 1, chl: 45 },
+  { name: 'Murchison Bay', country: 'Uganda', mx: 102, my: 44, lx: 112, ly: 47, anchor: 'start', mix: .8, chl: 40 },
+  { name: 'Sesse Islands', country: 'Uganda', mx: 66, my: 92, lx: 76, ly: 95, anchor: 'start', mix: .7, chl: 12 },
+  { name: 'Speke Gulf', country: 'Tanzania', mx: 178, my: 224, lx: 188, ly: 227, anchor: 'start', mix: 1.2, chl: 20 },
+  { name: 'Mwanza Gulf', country: 'Tanzania', mx: 114, my: 270, lx: 124, ly: 273, anchor: 'start', mix: 1.1, chl: 28 },
+  { name: 'Emin Pasha Gulf', country: 'Tanzania', mx: 56, my: 262, lx: 20, ly: 302, anchor: 'start', mix: .9, chl: 16 },
 ];
+// Algae, as chlorophyll-a in µg/L. chl is roughly today's level at each site: enclosed gulfs fed by towns and farms
+// (Winam Gulf, Murchison Bay by Kampala) run 30–60+, open water around the islands about 10–15. In the early 1960s,
+// before the perch boom, open-lake water held only about 2–3 µg/L. Perch eat the cichlids that graze the algae, so here
+// algae follow the perch: half the perch, half the extra algae; no perch left, and the water drifts back to 1960s levels.
+const ALGAE_1960 = 2.5;
+// When a bloom over about 25 µg/L dies off, rotting algae strip the oxygen and fish suffocate. Nile perch need the most oxygen
+// (they were most of the fish in the Nyanza Gulf kills); tilapia can gulp air at the surface and cope best.
+const ALGAE_SAFE = 25, ALGAE_SENS = { perch: 1.6, tilapia: .4, cichlid: .7, dagaa: 1, ngege: .6, ningu: .8 };
 const LAKE = '50,38 102,34 130,30 146,24 178,38 206,46 210,58 226,62 270,66 258,82 246,98 222,90 234,130 194,178 162,210 202,230 162,250 122,258 118,290 106,266 66,266 50,290 42,250 34,162 26,114 42,82';
 
 // Lake-wide fish counts at the start, used to turn fish on screen into real numbers.
@@ -563,7 +606,7 @@ let per = {}, bt = {};  // real fish, and tonnes, per fish on screen; set in ini
 const fmt = n => n >= 1e9 ? `${+(n / 1e9).toPrecision(3)} billion` : n >= 1e6 ? `${+(n / 1e6).toPrecision(3)} million` : Number(Math.round(n).toPrecision(3)).toLocaleString();
 const fmtS = n => n >= 1e9 ? `${+(n / 1e9).toPrecision(3)}B` : n >= 1e6 ? `${+(n / 1e6).toPrecision(3)}M` : n >= 1e3 ? `${+(n / 1e3).toPrecision(3)}K` : `${Math.round(n)}`;
 const fmtT = n => n >= 1e6 ? `${+(n / 1e6).toPrecision(3)} million t` : `${Number(Math.round(n).toPrecision(3)).toLocaleString()} t`;
-const blankDay = () => ({ born: {}, eaten: {}, natural: {}, fished: {}, trapped: {}, arrived: {} });
+const blankDay = () => ({ born: {}, eaten: {}, natural: {}, fished: {}, trapped: {}, arrived: {}, algae: {} });
 const bump = (cat, sp, n = 1) => { site.today[cat][sp] = (site.today[cat][sp] || 0) + n; };
 
 const $ = id => document.getElementById(id);
@@ -657,7 +700,7 @@ function spawnEdge(sp) {
 
 function makeSite(def, plan) {
   const s = { ...def, traps: plan.map(newTrap), sel: 0, obs: [], canoe: { x: R(200, 800), dir: Math.random() < .5 ? 1 : -1, landed: 0, arms: 0 }, fish: [], parts: [], nests: [], eggs: [], hist: [], log: [], today: blankDay(), days: [],
-    stats: { eaten: 0, eatenReal: 0, cannibal: 0 } };
+    stats: { eaten: 0, eatenReal: 0, cannibal: 0 }, algae: def.chl, algaeDead: {} };
   layout(s);
   at(s, () => {
     for (const k in START) {
@@ -670,6 +713,7 @@ function makeSite(def, plan) {
       if (Math.random() < (f.sp === 'perch' ? .6 : .3)) f.len = R(B.fry, B.mature);
     }
     log(plan.length ? `${ROLES[plan[0]].name} lowered into the lake.` : 'No traps here yet. Perch hunt freely.');
+    s.perch0 = Math.max(1, counts().perch);
     record();
   });
   return s;
@@ -690,19 +734,19 @@ function init() {
 // fish held in a prison are out of the lake; fish sheltering in a refuge still count
 function siteCounts(s, fertileOnly) {
   const c = {}; for (const k in SP) c[k] = 0;
-  for (const f of s.fish) if (!f.dead && f.hold !== 'prison' && f.state !== 'flying' && f.state !== 'netted' && !(fertileOnly && f.sterile)) c[f.sp]++;
+  for (const f of s.fish) if (!f.dead && f.hold !== 'prison' && f.state !== 'flying' && f.state !== 'netted' && f.state !== 'floating' && !(fertileOnly && f.sterile)) c[f.sp]++;
   return c;
 }
 const counts = () => siteCounts({ fish });
 function record() {
   const c = counts();
-  hist.push({ day, inv: c.perch, cic: c.cichlid });
+  hist.push({ day, inv: c.perch, cic: c.cichlid, alg: site.algae });
   if (hist.length > 240) hist.shift();
 }
 function recordLake() {
   let inv = 0, cic = 0;
   for (const s of sites) { const c = siteCounts(s); inv += c.perch; cic += c.cichlid; }
-  lakeHist.push({ day, inv, cic });
+  lakeHist.push({ day, inv, cic, alg: lakeAlgae() });
   if (lakeHist.length > 240) lakeHist.shift();
 }
 function dayTick() {
@@ -724,6 +768,7 @@ function siteDay(m, avg) {
     bump('born', e.sp, e.n);
   }
   eggs = eggs.filter(e => e.hatch > day);
+  algaeDay(c, m);
   const crowd = fish.length > 320;
   // share of grown males that are fertile; eggs fertilised by a sterile male never hatch
   const fertile = {};
@@ -761,6 +806,28 @@ function siteDay(m, avg) {
   if (site.days.length > 30) site.days.shift();
   site.today = blankDay();
   record();
+}
+// Algae drift toward a level set by how many perch are left here. Rains wash in nutrients and feed blooms.
+const lakeAlgae = () => sites.reduce((a, s) => a + s.algae, 0) / sites.length;
+function algaeDay(c, m) {
+  const left = clamp(c.perch / site.perch0, 0, 1.5);
+  const target = (ALGAE_1960 + (site.chl - ALGAE_1960) * left) * (left > 0 ? (rainy(m) ? 1.15 : .92) : 1);
+  site.algae = Math.max(ALGAE_1960 * .8, site.algae + (target - site.algae) * .06 + R(-.3, .3) * Math.min(1, left * 2 + .2));
+  // a bloom dying off: the chance and the share of fish that suffocate both grow with how far algae are over the safe level
+  const over = site.algae - ALGAE_SAFE;
+  if (over <= 0 || Math.random() > over * .0005) return;
+  const share = Math.min(.08, over / 800);
+  const killed = {};
+  for (const f of fish) {
+    if (f.dead || f.state !== 'free' || Math.random() > share * ALGAE_SENS[f.sp]) continue;
+    bump('algae', f.sp); site.algaeDead[f.sp] = (site.algaeDead[f.sp] || 0) + 1; killed[f.sp] = (killed[f.sp] || 0) + 1;
+    // at the site on screen the fish floats belly-up to the surface; elsewhere it's simply gone
+    if (site === view) Object.assign(f, { state: 'floating', floatT: 0, prey: null, vx: 0, vy: 0 });
+    else f.dead = true;
+  }
+  site.algae *= .85;  // the dead bloom sinks and rots
+  const n = simSum(killed);
+  if (n) log(`<b>Algae bloom died off.</b> Rotting algae used up the oxygen and ≈ ${fmt(realSum(killed))} fish suffocated (${n} on screen${killed.perch ? `, ${killed.perch} of them Nile perch` : ''}).`, 'inv');
 }
 // how many young survive fertilisation: each egg batch only hatches if its father was fertile
 function fertilised(B, fert) {
@@ -816,6 +883,13 @@ function updateFish(f, dt, hunters) {
   const s = SP[f.sp];
   f.wob += dt * (7 + Math.hypot(f.vx, f.vy) * .12);
   if (f.state === 'trap' || f.state === 'away' || f.state === 'flying') return;
+  if (f.state === 'floating') {
+    // a suffocated fish rolls belly-up and drifts to the surface, then is gone
+    f.floatT += dt; f.tilt = Math.min(Math.PI, f.floatT * 2); f.wob = 0;
+    f.y += (SURF + 6 - f.y) * Math.min(1, dt * .8);
+    if (f.floatT > 7) f.dead = true;
+    return;
+  }
   if (f.state === 'netted') {
     // swim into the net, struggle in its mesh, then get hauled up into the canoe
     const C = site.canoe; f.netT += dt;
@@ -1286,7 +1360,7 @@ function render() {
   }
   for (const T of site.traps) { trap = T; drawTrapBack(T); }
   if (opts.fishing > 0) drawNet(site.canoe);
-  for (const f of fish) if (f.state === 'free' || f.state === 'approach' || f.state === 'river' || f.state === 'netted') drawFish(f, undefined, site.fs);
+  for (const f of fish) if (f.state === 'free' || f.state === 'approach' || f.state === 'river' || f.state === 'netted' || f.state === 'floating') drawFish(f, undefined, site.fs);
   for (const T of site.traps) { trap = T; drawTrapFront(T); }
   for (const p of parts) {
     ctx.globalAlpha = Math.min(1, p.life / p.max * 2);
@@ -1369,6 +1443,8 @@ function drawBackdrop() {
   g = ctx.createLinearGradient(0, SURF, 0, H);
   g.addColorStop(0, L.water[0]); g.addColorStop(.45, L.water[1]); g.addColorStop(1, L.water[2]);
   ctx.fillStyle = g; ctx.fillRect(-700, SURF, W + 1400, H + 300 - SURF);
+  // algae turn the water pea-green: faint at today's island levels, thick in a gulf bloom
+  ctx.fillStyle = `rgba(92,140,24,${clamp((site.algae - 4) / 70, 0, .55)})`; ctx.fillRect(-700, SURF, W + 1400, H + 300 - SURF);
   // light shafts: strong in clear island water, faint in murky gulfs
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   for (let i = 0; i < 6; i++) {
@@ -2301,8 +2377,61 @@ function updateUI() {
   $('catchLine').textContent = `Fishers landed ≈ ${fmtT((C.perch || 0) * bt.perch)} of Nile perch and ≈ ${fmtT((C.dagaa || 0) * bt.dagaa)} of dagaa across the lake in the last 30 days. In 2021 the real lake averaged about 18,500 t and 76,000 t a month.`;
   $('chartWhere').textContent = chartScope === 'lake' ? `All ${sites.length} sites` : view.name;
   updateMeters();
+  updateAlgae();
   updateFactoryPanel();
   drawChart();
+}
+const ALGAE_WORDS = [[8, 'Clear'], [ALGAE_SAFE, 'Greenish'], [40, 'Algae bloom, risk of fish kills'], [Infinity, 'Thick bloom, frequent fish kills']];
+function updateAlgae() {
+  const list = chartScope === 'lake' ? sites : [view], a = list.reduce((x, s) => x + s.algae, 0) / list.length;
+  $('aLevel').innerHTML = `${a.toFixed(1)} <small>µg/L · ${ALGAE_WORDS.find(([v]) => a < v)[1]}</small>`;
+  $('aBar').style.width = `${clamp(a / 80, 0, 1) * 100}%`;
+  $('aGauge').setAttribute('aria-valuenow', Math.round(a));
+  const start = list.reduce((x, s) => x + s.chl, 0) / list.length, ch = (a - start) / start * 100;
+  $('aList').innerHTML = [
+    ['var(--algae)', 'At the start (today\'s real level)', `${start.toFixed(1)} µg/L`],
+    ['var(--muted)', 'Open lake in the early 1960s', `≈ ${ALGAE_1960} µg/L`],
+    ['var(--native)', 'Change since the start', `${ch > 0 ? '+' : ''}${ch.toFixed(0)}%`],
+  ].map(([c, l, v]) => `<li><span class="dot" style="background:${c}"></span><span>${l}</span><b>${v}</b></li>`).join('')
+    + (chartScope === 'lake' ? sites.map(s => `<li><span class="dot" style="background:transparent"></span><span>${s.name}</span><b>${s.algae.toFixed(1)}</b></li>`).join('') : '');
+  const D = tally(list).algae, all = {};
+  for (const s of list) for (const k in s.algaeDead) all[k] = (all[k] || 0) + s.algaeDead[k];
+  $('aDead').textContent = `≈ ${fmt(realSum(D))}`;
+  $('aDeadList').innerHTML = `<li><span class="dot" style="background:transparent"></span><span>In the last 30 days</span><b></b><small>${simSum(D)} on screen</small></li>`
+    + Object.keys(SP).map(k => `<li><span class="dot" style="background:${SP[k].dot}"></span><span>${SP[k].name}</span><b>≈ ${fmt((D[k] || 0) * per[k])}</b></li>`).join('')
+    + `<li><span class="dot" style="background:var(--algae)"></span><span>Since the simulation started</span><b>≈ ${fmt(realSum(all))}</b><small>${simSum(all)} on screen, ≈ ${fmt((all.perch || 0) * per.perch)} of them Nile perch</small></li>`;
+  $('algaeWhere').textContent = chartScope === 'lake' ? `Average of all ${sites.length} sites` : view.name;
+  drawAlgaeChart();
+}
+const ach = $('algaeChart'), actx = ach.getContext('2d');
+function drawAlgaeChart() {
+  const data = chartScope === 'lake' ? lakeHist : view.hist;
+  if (!data.length) return;
+  const w = ach.clientWidth, h = ach.clientHeight, d = Math.min(2, window.devicePixelRatio || 1);
+  if (ach.width !== Math.round(w * d)) { ach.width = Math.round(w * d); ach.height = Math.round(h * d); }
+  actx.setTransform(d, 0, 0, d, 0, 0); actx.clearRect(0, 0, w, h);
+  const pad = { l: 40, r: 48, t: 12, b: 22 }, pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+  const aTop = Math.max(20, Math.ceil(Math.max(...data.map(p => p.alg)) * 1.1 / 10) * 10);
+  const pv = p => p.inv * per.perch, pMax = Math.max(1, ...data.map(pv)), p10 = 10 ** Math.floor(Math.log10(pMax)), pTop = Math.ceil(pMax * 1.08 / p10) * p10;
+  const d0 = data[0].day, d1 = Math.max(d0 + 20, data[data.length - 1].day);
+  const X = v => pad.l + (v - d0) / (d1 - d0) * pw, YA = v => pad.t + ph - v / aTop * ph, YP = v => pad.t + ph - v / pTop * ph;
+  actx.font = '11px "IBM Plex Mono", Menlo, monospace'; actx.lineWidth = 1; actx.textBaseline = 'middle';
+  for (let v = 0; v <= aTop; v += aTop / 4) {
+    actx.strokeStyle = css('--line'); actx.beginPath(); actx.moveTo(pad.l, YA(v)); actx.lineTo(w - pad.r, YA(v)); actx.stroke();
+    actx.fillStyle = css('--algae'); actx.textAlign = 'right'; actx.fillText(Math.round(v), pad.l - 6, YA(v));
+    actx.fillStyle = css('--invasive'); actx.textAlign = 'left'; actx.fillText(fmtS(v / aTop * pTop), w - pad.r + 6, YA(v));
+  }
+  // dashed line: the level where dying blooms start to kill fish
+  actx.setLineDash([4, 4]); actx.strokeStyle = css('--muted'); actx.beginPath(); actx.moveTo(pad.l, YA(ALGAE_SAFE)); actx.lineTo(w - pad.r, YA(ALGAE_SAFE)); actx.stroke(); actx.setLineDash([]);
+  actx.fillStyle = css('--muted'); actx.textAlign = 'left'; actx.textBaseline = 'bottom'; actx.fillText('fish kills above this', pad.l + 6, YA(ALGAE_SAFE) - 2);
+  actx.textAlign = 'center'; actx.textBaseline = 'top';
+  const dstep = Math.max(5, Math.ceil((d1 - d0) / 6 / 5) * 5);
+  for (let v = Math.ceil(d0 / dstep) * dstep; v <= d1; v += dstep) actx.fillText('d' + v, X(v), h - pad.b + 6);
+  for (const [col, Y, v] of [[css('--invasive'), YP, pv], [css('--algae'), YA, p => p.alg]]) {
+    actx.beginPath(); data.forEach((p, i) => i ? actx.lineTo(X(p.day), Y(v(p))) : actx.moveTo(X(p.day), Y(v(p))));
+    actx.strokeStyle = col; actx.lineWidth = 2.2; actx.lineJoin = 'round'; actx.stroke();
+    const e = data[data.length - 1]; actx.fillStyle = col; actx.beginPath(); actx.arc(X(e.day), Y(v(e)), 3.5, 0, 7); actx.fill();
+  }
 }
 function tally(list) {
   const out = blankDay();
@@ -2311,7 +2440,7 @@ function tally(list) {
 }
 const realSum = o => Object.keys(o).reduce((a, sp) => a + o[sp] * per[sp], 0);
 const simSum = o => Object.values(o).reduce((a, n) => a + n, 0);
-const CAUSES = [['eaten', 'Eaten by Nile perch', 'var(--invasive)'], ['natural', 'Died young, old or sick', 'var(--muted)'], ['fished', 'Caught by fishers', 'var(--lake)'], ['trapped', 'Caught in prisons and landed', 'var(--balloon)']];
+const CAUSES = [['eaten', 'Eaten by Nile perch', 'var(--invasive)'], ['natural', 'Died young, old or sick', 'var(--muted)'], ['fished', 'Caught by fishers', 'var(--lake)'], ['trapped', 'Caught in prisons and landed', 'var(--balloon)'], ['algae', 'Suffocated after algae blooms', 'var(--algae)']];
 function updateMeters() {
   const T = tally(chartScope === 'lake' ? sites : [view]);
   const born = realSum(T.born), died = CAUSES.reduce((a, [k]) => a + realSum(T[k]), 0), top = Math.max(born, died, 1);
